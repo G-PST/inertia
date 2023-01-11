@@ -1,4 +1,4 @@
-package inertia
+package internal
 
 import (
     "testing"
