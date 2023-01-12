@@ -4,7 +4,7 @@ import (
     "time"
 )
 
-func run(source DataSource, vizs []Visualizer, freq time.Duration) {
+func Run(source DataSource, vizs []Visualizer, freq time.Duration) {
 
     for {
 

@@ -5,16 +5,16 @@ import (
 )
 
 type UnitState struct {
-    name string
-    category string
-    committed bool
-    h float64 // s
-    rating float64 // MVA
+    Name string
+    Category string
+    Committed bool
+    H float64 // s
+    Rating float64 // MVA
 }
 
 type SystemState struct {
-    time time.Time
-    units []UnitState
+    Time time.Time
+    Units []UnitState
 }
 
 type InertiaReport struct {
@@ -27,15 +27,15 @@ func (st SystemState) Inertia() InertiaReport {
     total_inertia := 0.0
     category_inertia := make(map[string]float64)
 
-    for _, unit := range st.units {
+    for _, unit := range st.Units {
 
-        if !unit.committed { continue }
+        if !unit.Committed { continue }
 
-        unit_inertia := unit.h * unit.rating
-        unitcategory_inertia := category_inertia[unit.category]
+        unit_inertia := unit.H * unit.Rating
+        unitcategory_inertia := category_inertia[unit.Category]
 
         total_inertia += unit_inertia
-        category_inertia[unit.category] = unitcategory_inertia + unit_inertia
+        category_inertia[unit.Category] = unitcategory_inertia + unit_inertia
 
     }
 
