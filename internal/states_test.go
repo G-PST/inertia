@@ -8,10 +8,10 @@ import (
 func TestInertiaCalculation(t *testing.T) {
 
     units := []UnitState {
-        { "U1", "C1", true, 10, 100 },
-        { "U2", "C1", true, 5, 50 },
-        { "U3", "C2", false, 10, 100 },
-        { "U4", "C2", true, 1, 100 },
+        { UnitMetadata {"U1", "C1", "Region" }, true, 10, 100 },
+        { UnitMetadata {"U2", "C1", "Region" }, true, 5, 50 },
+        { UnitMetadata {"U3", "C2", "Region" }, false, 10, 100 },
+        { UnitMetadata {"U4", "C2", "Region" }, true, 1, 100 },
     }
     state := SystemState { time.Now(), units }
     inertia := state.Inertia()

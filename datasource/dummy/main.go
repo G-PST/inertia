@@ -29,10 +29,19 @@ func (d *DummyDataSource) Query() (internal.SystemState, error) {
     d.lastTime = now
 
     units := []internal.UnitState {
-        { "U1", "C1", randBool(), 10, 100 },
-        { "U2", "C1", randBool(), 5, 50 },
-        { "U3", "C2", randBool(), 10, 100 },
-        { "U4", "C2", randBool(), 1, 100 },
+
+        { internal.UnitMetadata { "U1", "C1", "R1"},
+          randBool(), 10, 100 },
+
+        { internal.UnitMetadata { "U2", "C1", "R2" },
+          randBool(), 5, 50 },
+
+        { internal.UnitMetadata { "U3", "C2", "R1" },
+          randBool(), 10, 100 },
+
+        { internal.UnitMetadata { "U4", "C2", "R2" },
+          randBool(), 1, 100 },
+
     }
     
     return internal.SystemState { now, units }, nil

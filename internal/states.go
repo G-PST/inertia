@@ -4,9 +4,14 @@ import (
     "time"
 )
 
-type UnitState struct {
+type UnitMetadata struct {
     Name string
     Category string
+    Region string
+}
+
+type UnitState struct {
+    UnitMetadata
     Committed bool
     H float64 // s
     Rating float64 // MVA
