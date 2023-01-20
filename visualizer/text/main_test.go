@@ -13,7 +13,7 @@ func TestRun(t *testing.T) {
     datasource := d.New(2 * time.Second)
     vizs := []inertia.Visualizer { New() }
 
-    inertia.Run(datasource, vizs, time.Second)
+    inertia.Run(datasource, vizs, 500 * time.Millisecond, time.Second)
 
 }
 

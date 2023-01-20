@@ -4,13 +4,14 @@ import (
     "time"
 )
 
-func Run(source DataSource, vizs []Visualizer, freq time.Duration) {
+func Run(source DataSource, vizs []Visualizer,
+         success_freq time.Duration, fail_freq time.Duration) {
 
     for {
 
         state, err := source.Query()
         if err != nil {
-            time.Sleep(freq)
+            time.Sleep(fail_freq)
             continue
         }
 
@@ -18,5 +19,8 @@ func Run(source DataSource, vizs []Visualizer, freq time.Duration) {
             viz.Update(state)
         }
 
+        time.Sleep(success_freq)
+
     }
+
 }
