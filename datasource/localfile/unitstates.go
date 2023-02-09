@@ -70,32 +70,37 @@ func parseUnitStates(f io.Reader, metadata map[string]internal.UnitMetadata) ([]
         fields := strings.Split(line, ",")
 
         station_name := strings.Trim(fields[cols.station_name], "'\" ")
-        unit_name := strings.Trim(fields[cols.unit_name], "'\" ")
-        name := station_name + "_" + unit_name
+        // Workaround for RTAG data
+        if station_name != "" { 
 
-        committed := fields[cols.open] == "F" && fields[cols.remove] == "F"
+            unit_name := strings.Trim(fields[cols.unit_name], "'\" ")
+            name := station_name + "_" + unit_name
 
-        h, err := strconv.ParseFloat(fields[cols.h], 64)
-        if err != nil {
-            return nil, errors.New("Error parsing H")
+            committed := fields[cols.open] == "F" && fields[cols.remove] == "F"
+
+            h, err := strconv.ParseFloat(fields[cols.h], 64)
+            if err != nil {
+                return nil, errors.New("Error parsing H")
+            }
+
+            rating, err := strconv.ParseFloat(fields[cols.rating], 64)
+            if err != nil {
+                return nil, errors.New("Error parsing Rating")
+            }
+
+            unitmeta, ok := metadata[name]
+            if !ok {
+                return nil, errors.New("Encountered unit with no metadata (" + name + ")")
+            }
+
+            units = append(units, internal.UnitState {
+                UnitMetadata: unitmeta,
+                Committed: committed,
+                H: h,
+                Rating: rating,
+            })
+
         }
-
-        rating, err := strconv.ParseFloat(fields[cols.rating], 64)
-        if err != nil {
-            return nil, errors.New("Error parsing Rating")
-        }
-
-        unitmeta, ok := metadata[name]
-        if !ok {
-            return nil, errors.New("Encountered unit with no metadata (" + name + ")")
-        }
-
-        units = append(units, internal.UnitState {
-            UnitMetadata: unitmeta,
-            Committed: committed,
-            H: h,
-            Rating: rating,
-        })
 
         if !scanner.Scan() { break }
 
