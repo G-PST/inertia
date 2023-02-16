@@ -7,13 +7,17 @@ import (
 
 func TestInertiaCalculation(t *testing.T) {
 
+    categories := []UnitCategory { { "C1", "#00FF00" }, { "C2", "#0000FF" } }
+    regions := []Region { { "Region A" }, { "Region B" } }
+
     units := []UnitState {
-        { UnitMetadata {"U1", "C1", "Region" }, true, 10, 100 },
-        { UnitMetadata {"U2", "C1", "Region" }, true, 5, 50 },
-        { UnitMetadata {"U3", "C2", "Region" }, false, 10, 100 },
-        { UnitMetadata {"U4", "C2", "Region" }, true, 1, 100 },
+        { UnitMetadata {"U1", &categories[0], &regions[0] }, true, 10, 100 },
+        { UnitMetadata {"U2", &categories[0], &regions[1] }, true, 5, 50 },
+        { UnitMetadata {"U3", &categories[1], &regions[0] }, false, 10, 100 },
+        { UnitMetadata {"U4", &categories[1], &regions[1] }, true, 1, 100 },
     }
-    state := SystemState { time.Now(), units }
+
+    state := SystemState { time.Now(), 1000, units }
     inertia := state.Inertia()
 
     if i := inertia.Categories["C1"]; i != 1250 {

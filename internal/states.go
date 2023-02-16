@@ -4,10 +4,19 @@ import (
     "time"
 )
 
+type UnitCategory struct {
+    Name string
+    Color string
+}
+
+type Region struct {
+    Name string
+}
+
 type UnitMetadata struct {
     Name string
-    Category string
-    Region string
+    Category *UnitCategory
+    Region *Region
 }
 
 type UnitState struct {
@@ -19,11 +28,14 @@ type UnitState struct {
 
 type SystemState struct {
     Time time.Time
+    Requirement float64
     Units []UnitState
 }
 
 type InertiaReport struct {
+    Time time.Time
     Total float64
+    Requirement float64
     Categories map[string]float64
 }
 
@@ -37,13 +49,16 @@ func (st SystemState) Inertia() InertiaReport {
         if !unit.Committed { continue }
 
         unit_inertia := unit.H * unit.Rating
-        unitcategory_inertia := category_inertia[unit.Category]
 
         total_inertia += unit_inertia
-        category_inertia[unit.Category] = unitcategory_inertia + unit_inertia
+        category_inertia[unit.Category.Name] += unit_inertia
 
     }
 
-    return InertiaReport { total_inertia, category_inertia }
+    return InertiaReport {
+        st.Time,
+        total_inertia, st.Requirement,
+        category_inertia,
+    }
 
 }
