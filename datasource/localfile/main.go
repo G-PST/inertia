@@ -50,6 +50,24 @@ func New(statedir string, unitfileformat string, metadir string) (*LocalFile, er
 
 }
 
+func (lf *LocalFile) Metadata() internal.SystemMetadata {
+
+    regions := make([]internal.Region, 0, len(lf.regions))
+
+    for _, region := range lf.regions {
+        regions = append(regions, *region)
+    }
+
+    categories := make([]internal.UnitCategory, 0, len(lf.regions))
+
+    for _, category := range lf.categories {
+        categories = append(categories, *category)
+    }
+
+    return internal.SystemMetadata { regions, categories }
+
+}
+
 func (lf *LocalFile) Query() (internal.SystemState, error) {
 
     file, filetime, err := lf.NextFile()

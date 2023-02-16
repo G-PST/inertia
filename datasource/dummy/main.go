@@ -45,6 +45,12 @@ func New(freq time.Duration) *DummyDataSource {
 
 }
 
+func (d *DummyDataSource) Metadata() internal.SystemMetadata {
+
+    return internal.SystemMetadata { d.regions, d.categories }
+
+}
+
 func (d *DummyDataSource) Query() (internal.SystemState, error) {
 
     now := time.Now()

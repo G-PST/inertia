@@ -32,6 +32,11 @@ type SystemState struct {
     Units []UnitState
 }
 
+type SystemMetadata struct {
+    Regions []Region
+    Categories []UnitCategory
+}
+
 type InertiaReport struct {
     Time time.Time
     Total float64

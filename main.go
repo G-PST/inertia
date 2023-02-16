@@ -7,6 +7,12 @@ import (
 func Run(source DataSource, vizs []Visualizer,
          success_freq time.Duration, fail_freq time.Duration) {
 
+    metadata := source.Metadata()
+
+    for _, viz := range vizs {
+        viz.Init(metadata)
+    }
+
     for {
 
         state, err := source.Query()

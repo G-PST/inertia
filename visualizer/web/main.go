@@ -17,6 +17,7 @@ const ISO8601 = "2006-01-02T15:04:05"
 
 type WebVisualizer struct {
 
+    Metadata internal.SystemMetadata
     States []internal.SystemState
 
 }
@@ -32,6 +33,10 @@ func New(bind string) *WebVisualizer {
     go http.ListenAndServe(bind, nil)
 
     return wv
+}
+
+func (wv *WebVisualizer) Init(meta internal.SystemMetadata) {
+    wv.Metadata = meta
 }
 
 func (wv *WebVisualizer) Update(state internal.SystemState) {
