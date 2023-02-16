@@ -12,26 +12,39 @@ import (
 )
 
 type LocalFile struct {
+
     dir string
     unitfileFormat string
     lastTime time.Time
-    metadata map[string]internal.UnitMetadata
+
+    system SystemMetadata
+    regions map[string]*internal.Region
+    categories map[string]*internal.UnitCategory
+    units map[string]internal.UnitMetadata
+
 }
 
-func New(dir string, unitfileformat string, metafile string) (*LocalFile, error) {
-    
-    metadatafile, err := os.Open(metafile)
+func New(statedir string, unitfileformat string, metadir string) (*LocalFile, error) {
+
+    system, err := loadSystem(metadir)
     if err != nil { return nil, err }
 
-    metadata, err := parseMetadata(metadatafile)
-    if err != nil {
-        return nil, err
-    }
+    regions, err := loadRegions(metadir)
+    if err != nil { return nil, err }
+
+    categories, err := loadCategories(metadir)
+    if err != nil { return nil, err }
+
+    units, err := loadUnits(metadir, regions, categories)
+    if err != nil { return nil, err }
 
     lf := &LocalFile {
-        dir: dir,
+        dir: statedir,
         unitfileFormat: unitfileformat,
-        metadata: metadata,
+        system: system,
+        regions: regions,
+        categories: categories,
+        units: units,
     }
 
     return lf, nil
@@ -40,21 +53,20 @@ func New(dir string, unitfileformat string, metafile string) (*LocalFile, error)
 
 func (lf *LocalFile) Query() (internal.SystemState, error) {
 
-    // Extract filename and timestamp
     file, filetime, err := lf.NextFile()
     if err != nil {
         return internal.SystemState {}, err
     }
     fmt.Println(filetime)
 
-    units, err := parseUnitStates(file, lf.metadata)
+    units, err := parseUnitStates(file, lf.units)
     if err != nil {
         return internal.SystemState {}, err
     }
 
     lf.lastTime = filetime
 
-    return internal.SystemState {filetime, units}, nil
+    return internal.SystemState {filetime, lf.system.requirement, units}, nil
 
 }
 
