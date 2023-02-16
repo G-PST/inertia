@@ -10,7 +10,7 @@ import (
 
 func TestUnitStateParsing(t *testing.T) {
 
-    statefile, err := os.Open("test/states/sample_unitstates.csv")
+    statefile, err := os.Open("test/toy/states/sample_unitstates.csv")
     if err != nil {
         t.Fatalf("Error loading unit states sample: %v", err)
     }

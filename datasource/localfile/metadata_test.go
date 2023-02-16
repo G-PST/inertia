@@ -10,7 +10,7 @@ import (
 
 func TestMetdataParsing(t *testing.T) {
 
-    metadir := "test/metadata"
+    metadir := "test/toy/metadata"
 
     system, err := loadSystem(metadir)
     if err != nil {

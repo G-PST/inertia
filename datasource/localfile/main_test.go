@@ -8,8 +8,8 @@ import (
 func TestLocalFileLoadOrder(t *testing.T) {
 
     lf, err := New(
-        "test/states", "UNInertia_2006-01-02-15-04.csv",
-        "test/metadata")
+        "test/rtag/states", "UNInertia_2006-01-02-15-04.csv",
+        "test/rtag/metadata")
 
     if err != nil {
         t.Fatalf("Error creating LocalFile: %v", err)

@@ -8,7 +8,6 @@ import (
     "os"
     "path/filepath"
     "time"
-    "fmt"
 )
 
 type LocalFile struct {
@@ -57,7 +56,6 @@ func (lf *LocalFile) Query() (internal.SystemState, error) {
     if err != nil {
         return internal.SystemState {}, err
     }
-    fmt.Println(filetime)
 
     units, err := parseUnitStates(file, lf.units)
     if err != nil {
