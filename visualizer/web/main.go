@@ -35,8 +35,7 @@ func (wv *WebVisualizer) Init(meta internal.SystemMetadata) {
 
     wv.Metadata = meta
 
-    // http.HandleFunc("/", _) // TODO: Serve dashboard
-    // http.HandleFunc("/static", _) // TODO: Serve static assets
+    http.Handle("/", http.FileServer(http.Dir("app")))
     http.HandleFunc("/metadata", serveMetadata(wv))
     http.HandleFunc("/inertia", serveInertiaData(wv))
 

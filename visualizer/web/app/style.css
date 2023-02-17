@@ -1,0 +1,90 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: #333;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: max-content auto;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+p {
+    color: #FFF;
+    margin: 0 0 .5rem;
+}
+
+#time {
+    grid-column: 1 / 1;
+    grid-row: 1 / 1;
+    margin: 1em;
+    text-align: left;
+}
+
+#time #lastupdate {
+    font-size: 2em;
+}
+
+#time #elapsed {
+    font-style: italic;
+}
+
+#inertia {
+    grid-column: 2 / 2;
+    grid-row: 1 / 1;
+    margin: 1em;
+    text-align: right;
+}
+
+#inertia #absolute {
+    font-weight: bold;
+    font-size: 3em;
+}
+
+#inertia #relative {
+    font-size: 1em;
+}
+
+#plot {
+    grid-column: 1 / -1;
+    grid-row: 2 / 2;
+    margin: 1em;
+}
+
+/* Plot styles */
+
+svg {
+    width: 100%;
+    height: 100%
+}
+
+rect {
+    fill: none;
+}
+
+g#i-axis, g#t-axis {
+    color: #EEE;
+}
+line.axis {
+    stroke: #EEE;
+}
+
+polyline#requirement{
+    stroke: #FF0000;
+    stroke-dasharray: 5,5;
+    stroke-width: 3px;
+}
+
+text.inertia-legend {
+    font-weight: bold;
+    fill: #FFF;
+}
+

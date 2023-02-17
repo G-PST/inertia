@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>G-PST Inertia Monitoring Tool</title>
+    <script src="/d3.js" defer></script>
+    <script src="/app.js" defer></script>
+    <link href="/style.css" rel="stylesheet"/>
+</head>
+
+<body>
+
+<div id="time">
+    <p id="lastupdate"></p>
+    <p id="elapsed"></p>
+</div>
+
+<div id="inertia">
+    <p id="absolute"></p>
+    <p id="relative"></p>
+</div>
+
+<div id="plot">
+<svg id="frame">
+    <g id="canvas" />
+    <g id="overlay">
+        <g id="i-axis" />
+        <g id="t-axis" />
+        <polyline id="requirement" />
+    </g>
+</svg>
+</div>
+
+</body>
+</html>
