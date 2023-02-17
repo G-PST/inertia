@@ -5,12 +5,17 @@ import (
 )
 
 type UnitCategory struct {
-    Name string
-    Color string
+    Name string `json:"name"`
+    Color string `json:"color"`
 }
 
 type Region struct {
-    Name string
+    Name string `json:"name"`
+}
+
+type SystemMetadata struct {
+    Regions []Region `json:"regions"`
+    Categories []UnitCategory `json:"categories"`
 }
 
 type UnitMetadata struct {
@@ -30,11 +35,6 @@ type SystemState struct {
     Time time.Time
     Requirement float64
     Units []UnitState
-}
-
-type SystemMetadata struct {
-    Regions []Region
-    Categories []UnitCategory
 }
 
 type InertiaReport struct {

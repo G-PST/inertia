@@ -17,6 +17,8 @@ const ISO8601 = "2006-01-02T15:04:05"
 
 type WebVisualizer struct {
 
+    bind string
+
     Metadata internal.SystemMetadata
     States []internal.SystemState
 
@@ -24,23 +26,43 @@ type WebVisualizer struct {
 
 func New(bind string) *WebVisualizer {
 
-    wv := &WebVisualizer {}
-
-    // http.HandleFunc("/", _) // TODO: Serve dashboard
-    // http.HandleFunc("/static", _) // TODO: Serve static assets
-    http.HandleFunc("/inertia", serveInertiaData(wv))
-
-    go http.ListenAndServe(bind, nil)
-
+    wv := &WebVisualizer { bind: bind }
     return wv
+
 }
 
 func (wv *WebVisualizer) Init(meta internal.SystemMetadata) {
+
     wv.Metadata = meta
+
+    // http.HandleFunc("/", _) // TODO: Serve dashboard
+    // http.HandleFunc("/static", _) // TODO: Serve static assets
+    http.HandleFunc("/metadata", serveMetadata(wv))
+    http.HandleFunc("/inertia", serveInertiaData(wv))
+
+    go http.ListenAndServe(wv.bind, nil)
+
 }
 
 func (wv *WebVisualizer) Update(state internal.SystemState) {
     wv.States = append(wv.States, state) 
+}
+
+func serveMetadata(wv *WebVisualizer) http.HandlerFunc {
+
+    return func(w http.ResponseWriter, r *http.Request) {
+
+        meta, err := json.Marshal(wv.Metadata)
+        if err != nil {
+            w.WriteHeader(ServerError)
+            return
+        }
+
+        w.Write(meta)
+        return
+
+    }
+
 }
 
 func serveInertiaData(wv *WebVisualizer) http.HandlerFunc {
@@ -63,6 +85,7 @@ func serveInertiaData(wv *WebVisualizer) http.HandlerFunc {
         state, err := getNewer(wv.States, latest)
         if err != nil {
             w.WriteHeader(NoNewData)
+            fmt.Fprintln(w, "No new data")
             return
         }
 
@@ -85,7 +108,7 @@ func parseTime(timestamp string) (time.Time, error) {
         return time.Time {}, nil
     }
 
-    t, err := time.Parse(ISO8601, timestamp)
+    t, err := time.ParseInLocation(ISO8601, timestamp, time.Local)
     if err != nil {
         return time.Time {}, err
     }
