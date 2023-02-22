@@ -5,6 +5,7 @@ import (
     "errors"
     "net/http"
     "fmt"
+    "strconv"
     "time"
 
     "github.com/G-PST/inertia/internal"
@@ -13,7 +14,6 @@ import (
 const NoNewData = 204
 const BadRequest = 400
 const ServerError = 500
-const ISO8601 = "2006-01-02T15:04:05"
 
 type WebVisualizer struct {
 
@@ -107,12 +107,12 @@ func parseTime(timestamp string) (time.Time, error) {
         return time.Time {}, nil
     }
 
-    t, err := time.ParseInLocation(ISO8601, timestamp, time.Local)
+    t, err := strconv.Atoi(timestamp)
     if err != nil {
         return time.Time {}, err
     }
 
-    return t, nil
+    return time.UnixMilli(int64(t) + 1), nil
 
 }
 
@@ -133,7 +133,7 @@ func getNewer(states []internal.SystemState, latest time.Time) (internal.SystemS
 func jsonify(report internal.InertiaReport) ([]byte, error) {
 
     response := map[string]any {
-        "time": report.Time.Format(ISO8601),
+        "time": report.Time.UnixMilli(),
         "total": report.Total,
         "requirement": report.Requirement,
         "inertia": report.Categories,
