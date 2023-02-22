@@ -1,6 +1,7 @@
 package inertia
 
 import (
+    "log"
     "time"
 )
 
@@ -10,7 +11,10 @@ func Run(source DataSource, vizs []Visualizer,
     metadata := source.Metadata()
 
     for _, viz := range vizs {
-        viz.Init(metadata)
+        err := viz.Init(metadata)
+        if err != nil {
+            log.Fatal("Visualizer initialization error: ", err)
+        }
     }
 
     for {

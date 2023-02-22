@@ -19,7 +19,9 @@ func New() TextVisualizer {
     return TextVisualizer { os.Stdout }
 }
 
-func (tv TextVisualizer) Init(state internal.SystemMetadata) {}
+func (tv TextVisualizer) Init(state internal.SystemMetadata) error {
+    return nil
+}
 
 func (tv TextVisualizer) Update(state internal.SystemState) {
 

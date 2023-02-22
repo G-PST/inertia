@@ -31,7 +31,7 @@ func New(bind string) *WebVisualizer {
 
 }
 
-func (wv *WebVisualizer) Init(meta internal.SystemMetadata) {
+func (wv *WebVisualizer) Init(meta internal.SystemMetadata) error {
 
     wv.Metadata = meta
 
@@ -40,6 +40,8 @@ func (wv *WebVisualizer) Init(meta internal.SystemMetadata) {
     http.HandleFunc("/inertia", serveInertiaData(wv))
 
     go http.ListenAndServe(wv.bind, nil)
+
+    return nil
 
 }
 

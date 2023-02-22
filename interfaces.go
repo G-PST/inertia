@@ -22,7 +22,7 @@ type Visualizer interface {
 
     // Pass in static system parameters to the visualization.
     // Should be called exactly once, before any Updates are provided.
-    Init(internal.SystemMetadata)
+    Init(internal.SystemMetadata) error
 
     // Pass in a new SystemState to be added to the visualization.
     Update(internal.SystemState)
