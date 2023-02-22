@@ -1,67 +1,125 @@
-var colors = {
-    "Coal": "#222222",
-    "NG-Steam": "#3D3376",
-    "NG-CC": "#52216B",
-    "NG-CT": "#C2A1DB",
-    "Biomass": "#5B9844",
-    "Petroleum": "#853D65"
-};
-
-var updates = [
-    {
-        "time": new Date("2022-01-01T00:00:00"), "requirement": 100,
-        "data": { "Coal" : 30, "NG-CC": 40, "NG-CT": 40}
-    }, {
-        "time": new Date("2022-01-01T00:05:00"), "requirement": 100,
-        "data": { "Coal" : 30, "NG-CC": 30, "NG-CT": 40}
-    }, {
-        "time": new Date("2022-01-01T00:10:00"), "requirement": 100,
-        "inertia": { "Coal" : 30, "NG-CC": 30, "NG-CT": 30}
-    }, {
-        "time": new Date("2022-01-01T00:15:00"), "requirement": 100,
-        "inertia": { "Coal" : 30, "NG-CC": 35, "NG-CT": 40}
-    }
-];
-
-var timeWindow = 0.5 * 60 * 60 * 1000;
-
-// regenerate when new data is received
-const data = {
-    "timestamps": [new Date("2022-01-01T00:00:00"),
-                   new Date("2022-01-01T00:05:00"),
-                   new Date("2022-01-01T00:10:00"),
-                   new Date("2022-01-01T00:15:00")],
-    "requirement": [100, 100, 100, 100],
-    "inertia": [
-        {"name": "Coal", "data": [30, 30, 30, 30]},
-        {"name": "NG-CC", "data": [40, 30, 30, 35]},
-        {"name": "NG-CT", "data": [40, 40, 30, 40]}]
-};
-
-var x_offset = 30;
-var y_offset = 30;
+const timeWindow = 0.5 * 60 * 60 * 1000;
+const legend_min_inertia = 10;
 const sincetext = " since last update"
 
-function update(data) {
+// TODO: Set these dynamically based on axis text width/height
+const x_offset = 50;
+const y_offset = 30;
 
-    const currentData = current(data);
-    const latest = currentData.timestamp;
+const data = {
+    "regions": {}, // name: {name}
+    "categories": {}, // name: {name, color}
+    "latest": {}, // time, requirement, total, categories
+    "periods": {
+        "timestamps": [],
+        "total": [],
+        "requirement": [],
+        "categories": [] // {name, inertia: []}
+    }
+};
 
-    updateText(currentData);
+function initialize(data) {
+    initialize_metadata(data);
+    update(data, "");
+};
+
+function initialize_metadata(data) {
+
+    const req = new XMLHttpRequest();
+    req.open("GET", "/metadata", true);
+    req.responseType = 'json';
+
+    req.onload = function () {
+        if (req.readyState === 4) {
+            if (req.status === 200) {
+                data.regions = req.response.regions;
+                data.categories = req.response.categories;
+                data.periods.categories = Object.keys(data.categories).map(c => {
+                    const category = data.categories[c]
+                    return { "name": category.name, inertia: [] };
+                });
+            } else {
+                console.error(req.statusText);
+            }
+        }
+    };
+
+    req.onerror = function () {
+        console.error(req.statusText);
+    };
+
+    req.send(null);
+
+};
+
+function update(data, last=0) {
+
+    updateElapsed(data.latest.time);
+
+    const req = new XMLHttpRequest();
+
+    inertia_url = "/inertia?last="
+    if (last) {
+        inertia_url += last
+    } else if (data.latest.time) {
+        inertia_url += data.latest.time.valueOf()
+    };
+
+    req.open("GET", inertia_url, true);
+    req.responseType = 'json';
+
+    req.onload = function () {
+        if (req.readyState === 4) {
+            if (req.status === 200) {
+                latest = req.response;
+                data.latest = latest;
+                appendInertia(data, latest);
+                updateDisplay(data);
+            } else if (req.status != 204) {
+                console.error(req.statusText);
+            };
+        };
+    };
+
+    req.onerror = function () {
+        console.error(req.statusText);
+    };
+
+    req.send(null);
+
+};
+
+function appendInertia(data, latest) {
+
+    data.periods.timestamps.push(latest.time);
+    data.periods.requirement.push(latest.requirement);
+    data.periods.total.push(latest.total);
+    data.periods.categories.forEach(category => {
+        category_inertia = latest.inertia[category.name]
+        category.inertia.push(category_inertia);
+    });
+
+};
+
+function updateDisplay(data) {
+
+    const latest = data.latest.time;
+
+    updateText(data.latest);
 
     const frame = d3.select("#frame").node()
         .getBoundingClientRect();
 
     var timeScale = d3.scaleTime()
         .domain([latest - timeWindow, latest])
-        .range([x_offset,0.80 * frame.width]);
+        .range([x_offset, 0.80 * frame.width]);
 
 
     d3.select("#t-axis")
         .call(d3.axisBottom(timeScale))
         .style("transform", "translate(0," + (frame.height - y_offset) + "px )");
 
-    var inertia_max = maxInertia(data);
+    var inertia_max = maxInertia(data.periods);
     var inertiaScale = d3.scaleLinear()
         .domain([0, 1.1 * inertia_max])
         .range([frame.height - y_offset, 0]);
@@ -79,17 +137,17 @@ function update(data) {
 
 function updateCategories(data, timeScale, inertiaScale) {
 
-    const T = data.timestamps.length;
-    const ts = data.timestamps.map(timeScale);
+    const T = data.periods.timestamps.length;
+    const ts = data.periods.timestamps.map(timeScale);
 
     var cum_inertia = new Array(T).fill(0)
     var cum_inertia_prev = new Array(T).fill(0)
     var categories = [];
 
-    for (const category of data.inertia) {
+    for (const category of data.periods.categories) {
 
         for (var t = 0; t < T; t++) {
-            cum_inertia[t] = cum_inertia_prev[t] + category.data[t];
+            cum_inertia[t] = cum_inertia_prev[t] + category.inertia[t];
         }
 
         points = makePolyPoints(ts, 
@@ -100,7 +158,7 @@ function updateCategories(data, timeScale, inertiaScale) {
             "name": category.name,
             "points": points,
             "mid": inertiaScale((cum_inertia[T-1] + cum_inertia_prev[T-1]) / 2),
-            "val": category.data[T-1]
+            "val": category.inertia[T-1]
         });
 
         for (var t = 0; t < T; t++) {
@@ -114,8 +172,7 @@ function updateCategories(data, timeScale, inertiaScale) {
       .data(categories)
       .join("polygon")
       .classed("inertia-area", true)
-      .classed(d => d.name, true)
-      .attr("fill", d => colors[d.name])
+      .attr("fill", d => data.categories[d.name].color)
       .attr("points", d => d.points);
 
     d3.select("#canvas")
@@ -123,8 +180,8 @@ function updateCategories(data, timeScale, inertiaScale) {
       .data(categories)
       .join("text")
       .classed("inertia-legend", true)
-      .classed(d => d.name, true)
-      .text(d => d.name + " (" + d.val + " GW·s)")
+      .style("display", d => (d.val > legend_min_inertia) ? "" : "none" )
+      .text(d => d.name + " (" + d.val + " MW·s)")
       .attr("x", "85%")
       .attr("y", d => d.mid);
 
@@ -132,35 +189,34 @@ function updateCategories(data, timeScale, inertiaScale) {
 
 function updateRequirement(data, timeScale, inertiaScale) {
 
-    const ts = data.timestamps.map(timeScale);
+    const ts = data.periods.timestamps.map(timeScale);
 
     d3.select("#requirement")
-        .attr("points", makePoints(ts, data.requirement.map(inertiaScale)));
+        .attr("points", makePoints(ts, data.periods.requirement.map(inertiaScale)));
 
 }
 
 function updateText(currentData) {
 
-    t = currentData.timestamp;
+    const t = new Date(currentData.time);
 
     timestamp = t.getHours().toString().padStart(2, 0) + ":"
               + t.getMinutes().toString().padStart(2, 0) + ":"
               + t.getSeconds().toString().padStart(2, 0)
 
     d3.select("#time #lastupdate").text(timestamp);
-    d3.select("#time #elapsed").text("00:00:00" + sincetext);
 
-    absolute = currentData.inertia + " GW·s"
+    absolute = currentData.total + " MW·s"
 
-    if (currentData.inertia > currentData.requirement) {
+    if (currentData.total > currentData.requirement) {
 
-        surplus = currentData.inertia - currentData.requirement;
-        relative = surplus + " GW·s above threshold"
+        surplus = currentData.total - currentData.requirement;
+        relative = surplus + " MW·s above threshold"
         color = "#EEEEEE";
 
     } else {
-        shortfall = currentData.requirement - currentData.inertia;
-        relative = shortfall + " GW·s below threshold"
+        shortfall = currentData.requirement - currentData.total;
+        relative = shortfall + " MW·s below threshold"
         color = "#FF0000";
     }
 
@@ -174,9 +230,13 @@ function updateText(currentData) {
 
 }
 
-function updateElapsed(latest) {
+function updateElapsed(latest_time) {
 
-    var seconds_elapsed = (Date.now() - latest) / 1000
+    if (!latest_time) {
+        return
+    }
+
+    var seconds_elapsed = (Date.now() - latest_time) / 1000
 
     const hours_elapsed = Math.floor(seconds_elapsed / 3600);
     seconds_elapsed %= 3600;
@@ -185,7 +245,8 @@ function updateElapsed(latest) {
     seconds_elapsed %= 60;
 
     const elapsed = hours_elapsed.toString().padStart(2, 0) + ":"
-        + minutes_elapsed.toString().padStart(2, 0) + ":" + Math.floor(seconds_elapsed).toString().padStart(2, 0)
+        + minutes_elapsed.toString().padStart(2, 0) + ":"
+        + Math.floor(seconds_elapsed).toString().padStart(2, 0)
         + sincetext;
 
     d3.select("#time #elapsed").text(elapsed);
@@ -204,6 +265,7 @@ function makePoints(xs, ys) {
 
 }
 
+// TODO: Don't draw values outside the cutoff window
 function makePolyPoints(xs, ylows, yhighs) {
 
     var lows = ""
@@ -218,56 +280,20 @@ function makePolyPoints(xs, ylows, yhighs) {
 
 }
 
-function current(data) {
-
-    const last = data.timestamps.length - 1;
-    const currentTime = data.timestamps[last];
-    const currentRequirement = data.requirement[last];
-    var currentInertia = 0;
-
-    for (const category of data.inertia) {
-        currentInertia += category.data[last];
-    }
-
-    return {
-        "timestamp": currentTime,
-        "requirement": currentRequirement,
-        "inertia": currentInertia
-    };
-}
-
-function maxInertia(data) {
+function maxInertia(periods) {
 
     var max = 0;
 
-    for (t = 0; t < data.timestamps.length; t++) {
-
-        inertia = 0;
-
-        for (const category of data.inertia) {
-            inertia += category.data[t];
-        }
-
+    for (const inertia of periods.total) {
         if (inertia > max) {
             max = inertia
         }
-
     }
 
     return max;
 
 }
 
-// Define history length (e.g. 24 hours): plot points
-// from lastest - history to latest
-
-// - Receive new inertia state from websocket
-// - Pass to updater function, recalculate visualized set
-//   based on history length
-// - Regenerate time scale based on latest point and history length
-// Parse times to collect min/max and convert to linear scale
-// 
-
-var latest = update(data);
-
-setInterval(updateElapsed, 1000, latest);
+// TODO: Trigger re-draw when window size changes
+initialize(data);
+setInterval(update, 1000, data);
