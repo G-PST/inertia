@@ -2,9 +2,11 @@ package web
 
 import (
     "encoding/json"
+    "embed"
     "errors"
-    "net/http"
     "fmt"
+    "io/fs"
+    "net/http"
     "strconv"
     "time"
 
@@ -14,6 +16,9 @@ import (
 const NoNewData = 204
 const BadRequest = 400
 const ServerError = 500
+
+//go:embed app
+var assets embed.FS
 
 type WebVisualizer struct {
 
@@ -33,9 +38,11 @@ func New(bind string) *WebVisualizer {
 
 func (wv *WebVisualizer) Init(meta internal.SystemMetadata) error {
 
-    wv.Metadata = meta
+    appdir, err := fs.Sub(assets, "app")
+    if err != nil { return err }
 
-    http.Handle("/", http.FileServer(http.Dir("app")))
+    wv.Metadata = meta
+    http.Handle("/", http.FileServer(http.FS(appdir)))
     http.HandleFunc("/metadata", serveMetadata(wv))
     http.HandleFunc("/inertia", serveInertiaData(wv))
 
