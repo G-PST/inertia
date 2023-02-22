@@ -44,6 +44,8 @@ type InertiaReport struct {
     Categories map[string]float64
 }
 
+// TODO: Always report all categories, even when SystemState doesn't have
+// any for that category (committed or otherwise)
 func (st SystemState) Inertia() InertiaReport {
 
     total_inertia := 0.0
@@ -51,9 +53,11 @@ func (st SystemState) Inertia() InertiaReport {
 
     for _, unit := range st.Units {
 
-        if !unit.Committed { continue }
+        var unit_inertia float64
 
-        unit_inertia := unit.H * unit.Rating
+        if unit.Committed {
+            unit_inertia = unit.H * unit.Rating
+        }
 
         total_inertia += unit_inertia
         category_inertia[unit.Category.Name] += unit_inertia
