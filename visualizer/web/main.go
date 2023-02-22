@@ -51,7 +51,7 @@ func serveMetadata(wv *WebVisualizer) http.HandlerFunc {
 
     return func(w http.ResponseWriter, r *http.Request) {
 
-        meta, err := json.Marshal(wv.Metadata)
+        meta, err := jsonify_meta(wv.Metadata)
         if err != nil {
             w.WriteHeader(ServerError)
             return
@@ -127,6 +127,29 @@ func getNewer(states []internal.SystemState, latest time.Time) (internal.SystemS
     }
 
     return internal.SystemState {}, errors.New("No newer states avaialable")
+
+}
+
+// TODO: Just define appropriate methods in inertia/internal?
+func jsonify_meta(meta internal.SystemMetadata) ([]byte, error) {
+
+    regions := map[string]internal.Region {}
+    categories := map[string]internal.UnitCategory {}
+
+    for _, region := range meta.Regions {
+        regions[region.Name] = region
+    }
+
+    for _, category := range meta.Categories {
+        categories[category.Name] = category
+    }
+
+    response := map[string]any {
+        "regions": regions,
+        "categories": categories,
+    }
+
+    return json.Marshal(response)
 
 }
 
