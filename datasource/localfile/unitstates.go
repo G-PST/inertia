@@ -41,7 +41,7 @@ func parseUnitStates(f io.Reader, metadata map[string]internal.UnitMetadata) ([]
         colname := strings.TrimSpace(rep.Replace(line))
 
         switch colname {
-        case "ID_ST":
+        case "REGST_UN":
             cols.station_name = colnum
         case "ID_UN":
             cols.unit_name = colnum
