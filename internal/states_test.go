@@ -7,7 +7,10 @@ import (
 
 func TestInertiaCalculation(t *testing.T) {
 
-    categories := []UnitCategory { { "C1", "#00FF00" }, { "C2", "#0000FF" } }
+    categories := []UnitCategory {
+        { "C1", "#00FF00", 1 }, { "C2", "#0000FF", 2 },
+    }
+
     regions := []Region { { "Region A" }, { "Region B" } }
 
     units := []UnitState {

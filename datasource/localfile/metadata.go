@@ -99,7 +99,7 @@ func loadCategories(metadir string) (map[string]*internal.UnitCategory, error) {
 func parseCategories(f io.Reader) (map[string]*internal.UnitCategory, error) {
 
     regionfile := csv.NewReader(f)
-    regionfile.FieldsPerRecord = 2
+    regionfile.FieldsPerRecord = 3
 
     categories := map[string]*internal.UnitCategory {}
 
@@ -116,11 +116,16 @@ func parseCategories(f io.Reader) (map[string]*internal.UnitCategory, error) {
         categoryname := fields[0]
         color := fields[1]
 
+        order,err := strconv.Atoi(fields[2])
+        if err != nil { return nil, err }
+
         if _, ok := categories[categoryname]; ok {
             return nil, errors.New("Duplicate category name")
         }
 
-        categories[categoryname] = &internal.UnitCategory { categoryname, color }
+        categories[categoryname] = &internal.UnitCategory {
+            categoryname, color, order,
+        }
 
     }
 

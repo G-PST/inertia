@@ -54,9 +54,9 @@ var regions_ref = map[string]*internal.Region {
 }
 
 var categories_ref = map[string]*internal.UnitCategory {
-    "NGAS": &internal.UnitCategory { "NGAS", "#52216B" },
-    "HYDR": &internal.UnitCategory { "HYDR", "#187F94" },
-    "WIND": &internal.UnitCategory { "WIND", "#00B6EF" },
+    "NGAS": &internal.UnitCategory { "NGAS", "#52216B", 1 },
+    "HYDR": &internal.UnitCategory { "HYDR", "#187F94", 2 },
+    "WIND": &internal.UnitCategory { "WIND", "#00B6EF", 3 },
 }
 
 var metadata_ref = map[string]internal.UnitMetadata{

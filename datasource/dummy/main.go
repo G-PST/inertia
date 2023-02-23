@@ -26,7 +26,7 @@ func New(freq time.Duration) *DummyDataSource {
     }
 
     categories := []internal.UnitCategory {
-        { "C1", "#00FF00" }, { "C2", "#0000FF" },
+        { "C1", "#00FF00", 1 }, { "C2", "#0000FF", 2 },
     }
 
     units := []internal.UnitMetadata {

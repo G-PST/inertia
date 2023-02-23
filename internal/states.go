@@ -7,6 +7,7 @@ import (
 type UnitCategory struct {
     Name string `json:"name"`
     Color string `json:"color"`
+    Order int `json:"order"`
 }
 
 type Region struct {
