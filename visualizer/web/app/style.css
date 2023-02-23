@@ -66,10 +66,6 @@ svg {
     height: 100%
 }
 
-rect {
-    fill: none;
-}
-
 g#i-axis, g#t-axis {
     color: #EEE;
 }
@@ -88,3 +84,11 @@ text.inertia-legend {
     fill: #FFF;
 }
 
+text.inertia-legend tspan {
+    fill: #CCC;
+};
+
+rect.inertia-legend-swatch {
+    width: 10px;
+    height: 10px;
+}
