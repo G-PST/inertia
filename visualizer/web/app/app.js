@@ -1,12 +1,13 @@
 const timeWindow = 24 * 60 * 60 * 1000; // ms
 const legend_cutoff = 8; // px
 const sincetext = " since last update"
-const updateInterval = 1000; // ms
+const updateInterval = 3000; // ms
 
 const units = "GW·s"
 const unitscaling = 0.001
 
-// TODO: Category sort data
+const month = new Intl.DateTimeFormat("en-US", {month: "short"})
+
 // TODO: Set these dynamically based on axis text width/height
 const x_offset = 50;
 const y_offset = 30;
@@ -38,11 +39,17 @@ function run(data) {
 
         data.regions = req.response.regions;
         data.categories = req.response.categories;
-        data.periods.categories = Object.keys(data.categories).map(c => {
+
+        ordered_cnames = Object.keys(data.categories)
+            .sort((c1, c2) =>
+                  data.categories[c1].order > data.categories[c2].order)
+
+        data.periods.categories = ordered_cnames.map(c => {
             const category = data.categories[c]
             return { "name": category.name, inertia: [] };
         });
 
+        update(data);
         setInterval(update, updateInterval, data);
 
     };
@@ -56,8 +63,6 @@ function run(data) {
 };
 
 function update(data, last=0) {
-
-    updateElapsed(data.latest.time);
 
     const req = new XMLHttpRequest();
 
@@ -75,6 +80,7 @@ function update(data, last=0) {
         if (req.readyState === 4) {
             if (req.status === 200) {
                 latest = req.response;
+                data.lastpoll = new Date();
                 data.latest = latest;
                 appendInertia(data, latest);
                 updateDisplay(data);
@@ -194,11 +200,11 @@ function updateRequirement(data, timeScale, inertiaScale) {
 
 function updateText(currentData) {
 
-    const t = new Date(currentData.time);
-
+    t = new Date(currentData.time);
     timestamp = t.getHours().toString().padStart(2, 0) + ":"
               + t.getMinutes().toString().padStart(2, 0) + ":"
-              + t.getSeconds().toString().padStart(2, 0)
+              + t.getSeconds().toString().padStart(2, 0) + " "
+              + month.format(t) + " " + t.getDate()
 
     d3.select("#time #lastupdate").text(timestamp);
 
@@ -223,29 +229,6 @@ function updateText(currentData) {
     d3.select("#inertia #relative")
         .text(relative)
         .style("color", color);
-
-}
-
-function updateElapsed(latest_time) {
-
-    if (!latest_time) {
-        return
-    }
-
-    var seconds_elapsed = (Date.now() - latest_time) / 1000
-
-    const hours_elapsed = Math.floor(seconds_elapsed / 3600);
-    seconds_elapsed %= 3600;
-
-    const minutes_elapsed = Math.floor(seconds_elapsed / 60);
-    seconds_elapsed %= 60;
-
-    const elapsed = hours_elapsed.toString().padStart(2, 0) + ":"
-        + minutes_elapsed.toString().padStart(2, 0) + ":"
-        + Math.floor(seconds_elapsed).toString().padStart(2, 0)
-        + sincetext;
-
-    d3.select("#time #elapsed").text(elapsed);
 
 }
 
@@ -360,5 +343,30 @@ function maxLegendWidth() {
 
 };
 
+function updateElapsed(data) {
+
+    if (!data.lastpoll) {
+        return
+    }
+
+    var seconds_elapsed = (Date.now() - data.lastpoll) / 1000
+
+    const hours_elapsed = Math.floor(seconds_elapsed / 3600);
+    seconds_elapsed %= 3600;
+
+    const minutes_elapsed = Math.floor(seconds_elapsed / 60);
+    seconds_elapsed %= 60;
+
+    const elapsed = hours_elapsed.toString().padStart(2, 0) + ":"
+        + minutes_elapsed.toString().padStart(2, 0) + ":"
+        + Math.floor(seconds_elapsed).toString().padStart(2, 0)
+        + sincetext;
+
+    d3.select("#time #elapsed").text(elapsed);
+
+}
+
+
 // TODO: Trigger re-draw when window size changes
 run(data);
+setInterval(updateElapsed, 1000, data);

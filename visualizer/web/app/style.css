@@ -35,6 +35,8 @@ p {
 
 #time #elapsed {
     font-style: italic;
+    color: #CCC;
+    font-size: 0.8em;
 }
 
 #inertia {
