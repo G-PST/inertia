@@ -1,7 +1,7 @@
-const timeWindow = 24 * 60 * 60 * 1000; // ms
-const legend_cutoff = 8; // px
+const timeWindow = 0.5 * 60 * 60 * 1000; // ms
+const legend_cutoff = 40; // arc length pixels
 const sincetext = " since last update"
-const updateInterval = 3000; // ms
+const updateInterval = 1000; // ms
 
 const units = "GW·s"
 const unitscaling = 0.001
@@ -123,12 +123,18 @@ function updateDisplay(data) {
     const frame = d3.select("#frame").node()
         .getBoundingClientRect();
 
+    plotframe_w = frame.width * .67;
+    ringframe_w = frame.width * .33;
+
+    ring_x = plotframe_w + ringframe_w/2;
+    ring_y = (frame.height - y_offset) / 2;
+    ring_r = 0.7 * (Math.min(ringframe_w/2, ring_y) - y_offset);
+
     const legendroom = maxLegendWidth() + 40;
 
     var timeScale = d3.scaleTime()
         .domain([latest - timeWindow, latest])
-        .range([x_offset, frame.width - legendroom]);
-
+        .range([x_offset, plotframe_w - legendroom]);
 
     d3.select("#t-axis")
         .call(d3.axisBottom(timeScale))
@@ -143,48 +149,40 @@ function updateDisplay(data) {
         .call(d3.axisLeft(inertiaScale))
         .style("transform", "translate("+ x_offset + "px,0)");
 
-    updateCategories(data, timeScale, inertiaScale);
+    updateInertia(data, timeScale, inertiaScale);
+    updateCategories(data, ring_x, ring_y, ring_r);
     updateRequirement(data, timeScale, inertiaScale);
 
     return latest
 
 };
 
-function updateCategories(data, timeScale, inertiaScale) {
+function updateCategories(data, x, y, r) {
 
-    const plot_max_x = timeScale.range()[1];
-    const categories = categoryPlotData(
-        data.periods, timeScale, inertiaScale);
+    const categories = categoryRingData(data.latest, x, y, r);
 
-    d3.select("#canvas")
+    d3.select("#ring")
       .selectAll(".inertia-area")
       .data(categories)
-      .join("polygon")
+      .join("path")
       .classed("inertia-area", true)
-      .attr("fill", d => data.categories[d.name].color)
-      .attr("points", d => d.points);
+      .attr("stroke", d => data.categories[d.name].color)
+      .attr("stroke-width", r * .7)
+      .attr("d", d => d.path);
 
-    d3.select("#canvas")
-      .selectAll(".inertia-legend-swatch")
-      .data(categories)
-      .join("polygon")
-      .classed("inertia-legend-swatch", true)
-      .attr("points", "0,0 10,5 10,-5")
-      .style("display", d => (d.height > legend_cutoff) ? "" : "none" )
-      .attr("transform", d => ("translate(" + (plot_max_x + 10) + " " + d.mid + ")"))
-      .style("fill", d => data.categories[d.name].color);
-
-    d3.select("#canvas")
+    d3.select("#ring")
       .selectAll(".inertia-legend")
       .data(categories)
       .join("text")
       .classed("inertia-legend", true)
-      .style("display", d => (d.height > legend_cutoff) ? "" : "none" )
+      .style("display", d => (d.arclength > legend_cutoff) ? "" : "none" )
       .text(d => d.name)
-      .attr("x", plot_max_x + 30)
-      .attr("y", d => d.mid + 5)
+      .attr("x", d => d.mid_x)
+      .attr("y", d => d.mid_y - 10)
       .append("tspan")
-      .text(d => (" (" + inertiaText(d.val) + ")"));
+      .text(d => (" (" + inertiaText(d.val) + ")"))
+      .attr("x", d => d.mid_x)
+      .attr("y", d => d.mid_y + 10);
 
 }
 
@@ -195,6 +193,16 @@ function updateRequirement(data, timeScale, inertiaScale) {
 
     d3.select("#requirement")
         .attr("points", makePoints(ts, data.periods.requirement.map(inertiaScale), t_cutoff));
+
+}
+
+function updateInertia(data, timeScale, inertiaScale) {
+
+    const ts = data.periods.timestamps.map(timeScale);
+    const t_cutoff = timeScale.range()[0]
+
+    d3.select("#total-inertia")
+        .attr("points", makePoints(ts, data.periods.total.map(inertiaScale), t_cutoff));
 
 }
 
@@ -284,41 +292,46 @@ function inertiaText(x) {
     return (x * unitscaling).toFixed(1) + " " + units;
 };
 
-function categoryPlotData(periods, timeScale, inertiaScale) {
+function categoryRingData(latest, cx, cy, r) {
 
-    const T = data.periods.timestamps.length;
-    const ts = data.periods.timestamps.map(timeScale);
-    const t_cutoff = timeScale.range()[0];
+    categories = [];
+    cum_angle = 0
 
-    var cum_inertia = new Array(T).fill(0);
-    var cum_inertia_prev = new Array(T).fill(0);
-    var categories = [];
+    for (const c of Object.keys(latest.inertia)) {
 
-    for (const category of periods.categories) {
+        share = latest.inertia[c] / latest.total;
+        angle = share * 2 * Math.PI;
 
-        for (var t = 0; t < T; t++) {
-            cum_inertia[t] = cum_inertia_prev[t] + category.inertia[t];
+        mid_x = cx + r * Math.sin(cum_angle + angle/2);
+        mid_y = cy - r * Math.cos(cum_angle + angle/2);
+
+        x = cx + r * Math.sin(cum_angle);
+        y = cy - r * Math.cos(cum_angle);
+        path = "M " + x + " " + y + " ";
+
+        cum_angle += angle;
+
+        x = cx + r * Math.sin(cum_angle);
+        y = cy - r * Math.cos(cum_angle);
+
+        path += "A " + r + " " + r + " 0 ";
+
+        if (angle > Math.PI) {
+            path += "1 1 "
+        } else {
+            path += "0 1 "
         }
+        path += x + " " + y;
 
-        points = makePolyPoints(ts, 
-            cum_inertia_prev.map(inertiaScale),
-            cum_inertia.map(inertiaScale),
-            t_cutoff
-        );
-
-        category_plotdata = {
-            "name": category.name,
-            "points": points,
-            "height": inertiaScale(cum_inertia_prev[T-1]) - inertiaScale(cum_inertia[T-1]),
-            "mid": inertiaScale((cum_inertia[T-1] + cum_inertia_prev[T-1]) / 2),
-            "val": category.inertia[T-1]
-        };
-
-        categories.push(category_plotdata);
-
-        for (var t = 0; t < T; t++) {
-            cum_inertia_prev[t] = cum_inertia[t];
-        }
+        categories.push({
+            "name": c,
+            "path": path,
+            "mid_x": mid_x,
+            "mid_y": mid_y,
+            "val": latest.inertia[c],
+            "share": share,
+            "arclength": r*angle
+        });
 
     }
 

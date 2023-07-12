@@ -75,6 +75,7 @@ func serveMetadata(wv *WebVisualizer) http.HandlerFunc {
 
 func serveInertiaData(wv *WebVisualizer) http.HandlerFunc {
 
+    // TODO: Return ALL states newer than latest, not just one
     return func(w http.ResponseWriter, r *http.Request) {
 
         err := r.ParseForm()

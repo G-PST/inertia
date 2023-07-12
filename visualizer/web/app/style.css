@@ -79,11 +79,19 @@ polyline#requirement{
     stroke: #FF0000;
     stroke-dasharray: 5,5;
     stroke-width: 3px;
+    fill: none;
+}
+
+polyline#total-inertia{
+    stroke: #FFFFFF;
+    stroke-width: 3px;
+    fill: none;
 }
 
 text.inertia-legend {
     font-weight: bold;
     fill: #FFF;
+    text-anchor: middle;
 }
 
 text.inertia-legend tspan {
@@ -93,4 +101,8 @@ text.inertia-legend tspan {
 rect.inertia-legend-swatch {
     width: 10px;
     height: 10px;
+}
+
+path.inertia-area {
+    fill: none;
 }
