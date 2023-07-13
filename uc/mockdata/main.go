@@ -1,42 +1,43 @@
-package dummy
+package mockdata
 
 import (
     "errors"
     "math/rand"
     "time"
 
-    "github.com/G-PST/inertia/internal"
+    "github.com/G-PST/inertia"
+    "github.com/G-PST/inertia/uc"
 )
 
-type DummyDataSource struct {
+type MockDataSource struct {
 
     freq time.Duration
     lastTime time.Time
 
-    regions []internal.Region
-    categories []internal.UnitCategory
-    units []internal.UnitMetadata
+    regions []inertia.Region
+    categories []inertia.UnitCategory
+    units []inertia.UnitMetadata
 
 }
 
-func New(freq time.Duration) *DummyDataSource {
+func New(freq time.Duration) *MockDataSource {
 
-    regions := []internal.Region {
+    regions := []inertia.Region {
         { "Region A" }, { "Region B" },
     }
 
-    categories := []internal.UnitCategory {
+    categories := []inertia.UnitCategory {
         { "C1", "#00FF00", 1 }, { "C2", "#0000FF", 2 },
     }
 
-    units := []internal.UnitMetadata {
+    units := []inertia.UnitMetadata {
         { "U1", &categories[0], &regions[0] },
         { "U2", &categories[0], &regions[1] },
         { "U3", &categories[1], &regions[0] },
         { "U4", &categories[1], &regions[1] },
     }
 
-    return &DummyDataSource {
+    return &MockDataSource {
         freq: freq,
         regions: regions,
         categories: categories,
@@ -45,31 +46,31 @@ func New(freq time.Duration) *DummyDataSource {
 
 }
 
-func (d *DummyDataSource) Metadata() internal.SystemMetadata {
+func (d *MockDataSource) Metadata() inertia.SystemMetadata {
 
-    return internal.SystemMetadata { d.regions, d.categories }
+    return inertia.SystemMetadata { d.regions, d.categories }
 
 }
 
-func (d *DummyDataSource) Query() (internal.SystemState, error) {
+func (d *MockDataSource) Query() (inertia.SystemState, error) {
 
     now := time.Now()
     next_result := d.lastTime.Add(d.freq)
 
     if now.Before(next_result) {
-        return internal.SystemState{}, errors.New("No new data")
+        return uc.SystemState{}, errors.New("No new data")
     }
 
     d.lastTime = now
 
-    units := []internal.UnitState {
+    units := []uc.UnitState {
         { d.units[0], randBool(), 10, 100 },
         { d.units[1], randBool(), 5, 50 },
         { d.units[2], randBool(), 10, 100 },
         { d.units[3], randBool(), 1, 100 },
     }
     
-    return internal.SystemState { now, 1500, units }, nil
+    return uc.SystemState { now, 1500, units }, nil
 
 }
 

@@ -10,7 +10,7 @@ import (
     "strconv"
     "time"
 
-    "github.com/G-PST/inertia/internal"
+    "github.com/G-PST/inertia"
 )
 
 const NoNewData = 204
@@ -24,8 +24,8 @@ type WebVisualizer struct {
 
     bind string
 
-    Metadata internal.SystemMetadata
-    States []internal.SystemState
+    Metadata inertia.SystemMetadata
+    States []inertia.Snapshot
 
 }
 
@@ -36,7 +36,7 @@ func New(bind string) *WebVisualizer {
 
 }
 
-func (wv *WebVisualizer) Init(meta internal.SystemMetadata) error {
+func (wv *WebVisualizer) Init(meta inertia.SystemMetadata) error {
 
     appdir, err := fs.Sub(assets, "app")
     if err != nil { return err }
@@ -52,7 +52,7 @@ func (wv *WebVisualizer) Init(meta internal.SystemMetadata) error {
 
 }
 
-func (wv *WebVisualizer) Update(state internal.SystemState) {
+func (wv *WebVisualizer) Update(state inertia.Snapshot) {
     wv.States = append(wv.States, state) 
 }
 
@@ -98,7 +98,7 @@ func serveInertiaData(wv *WebVisualizer) http.HandlerFunc {
             return
         }
 
-        response, err := jsonify(state.Inertia())
+        response, err := jsonify(state)
         if err != nil {
             w.WriteHeader(ServerError)
             return
@@ -126,7 +126,7 @@ func parseTime(timestamp string) (time.Time, error) {
 
 }
 
-func getNewer(states []internal.SystemState, latest time.Time) (internal.SystemState, error) {
+func getNewer(states []inertia.Snapshot, latest time.Time) (inertia.Snapshot, error) {
 
     for _, state := range states {
 
@@ -136,15 +136,15 @@ func getNewer(states []internal.SystemState, latest time.Time) (internal.SystemS
 
     }
 
-    return internal.SystemState {}, errors.New("No newer states avaialable")
+    return inertia.Snapshot {}, errors.New("No newer states avaialable")
 
 }
 
 // TODO: Just define appropriate methods in inertia/internal?
-func jsonify_meta(meta internal.SystemMetadata) ([]byte, error) {
+func jsonify_meta(meta inertia.SystemMetadata) ([]byte, error) {
 
-    regions := map[string]internal.Region {}
-    categories := map[string]internal.UnitCategory {}
+    regions := map[string]inertia.Region {}
+    categories := map[string]inertia.UnitCategory {}
 
     for _, region := range meta.Regions {
         regions[region.Name] = region
@@ -163,7 +163,7 @@ func jsonify_meta(meta internal.SystemMetadata) ([]byte, error) {
 
 }
 
-func jsonify(report internal.InertiaReport) ([]byte, error) {
+func jsonify(report inertia.Snapshot) ([]byte, error) {
 
     response := map[string]any {
         "time": report.Time.UnixMilli(),

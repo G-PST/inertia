@@ -5,7 +5,7 @@ import (
     "time"
 
     "github.com/G-PST/inertia"
-    d "github.com/G-PST/inertia/datasource/dummy"
+    d "github.com/G-PST/inertia/uc/mockdata"
 )
 
 func TestRun(t *testing.T) {

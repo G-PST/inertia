@@ -1,32 +1,12 @@
-package internal
+package uc
 
 import (
     "time"
+    "github.com/G-PST/inertia"
 )
 
-type UnitCategory struct {
-    Name string `json:"name"`
-    Color string `json:"color"`
-    Order int `json:"order"`
-}
-
-type Region struct {
-    Name string `json:"name"`
-}
-
-type SystemMetadata struct {
-    Regions []Region `json:"regions"`
-    Categories []UnitCategory `json:"categories"`
-}
-
-type UnitMetadata struct {
-    Name string
-    Category *UnitCategory
-    Region *Region
-}
-
 type UnitState struct {
-    UnitMetadata
+    inertia.UnitMetadata
     Committed bool
     H float64 // s
     Rating float64 // MVA
@@ -38,16 +18,9 @@ type SystemState struct {
     Units []UnitState
 }
 
-type InertiaReport struct {
-    Time time.Time
-    Total float64
-    Requirement float64
-    Categories map[string]float64
-}
-
 // TODO: Always report all categories, even when SystemState doesn't have
 // any for that category (committed or otherwise)
-func (st SystemState) Inertia() InertiaReport {
+func (st SystemState) Inertia() (inertia.Snapshot, error) {
 
     total_inertia := 0.0
     category_inertia := make(map[string]float64)
@@ -65,10 +38,10 @@ func (st SystemState) Inertia() InertiaReport {
 
     }
 
-    return InertiaReport {
+    return inertia.Snapshot{
         st.Time,
         total_inertia, st.Requirement,
         category_inertia,
-    }
+    }, nil
 
 }
