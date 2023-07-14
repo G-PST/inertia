@@ -1,18 +1,19 @@
-package web
+package main
 
 import (
-    "testing"
     "time"
 
     "github.com/G-PST/inertia"
+    "github.com/G-PST/inertia/viz/text"
     d "github.com/G-PST/inertia/uc/mockdata"
 )
 
-func TestRun(t *testing.T) {
+func main() {
 
-    datasource := d.New(10 * time.Second)
-    vizs := []inertia.Visualizer { New(":8181") }
+    datasource := d.New(2 * time.Second)
+    vizs := []inertia.Visualizer { text.New() }
 
     inertia.Run(datasource, vizs, 500 * time.Millisecond, time.Second)
 
 }
+
