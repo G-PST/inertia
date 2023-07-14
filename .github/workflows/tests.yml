@@ -1,10 +1,11 @@
-name: Build and test package
+name: Test Suite
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_call:
 
 jobs:
   run-tests:
