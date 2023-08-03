@@ -31,10 +31,10 @@ func New(freq time.Duration) *MockDataSource {
     }
 
     units := []inertia.UnitMetadata {
-        { "U1", &categories[0], &regions[0] },
-        { "U2", &categories[0], &regions[1] },
-        { "U3", &categories[1], &regions[0] },
-        { "U4", &categories[1], &regions[1] },
+        { "U1", &categories[0], &regions[0], 100, 10 },
+        { "U2", &categories[0], &regions[1], 50, 5 },
+        { "U3", &categories[1], &regions[0], 100, 10 },
+        { "U4", &categories[1], &regions[1], 100, 1 },
     }
 
     return &MockDataSource {
@@ -52,25 +52,27 @@ func (d *MockDataSource) Metadata() inertia.SystemMetadata {
 
 }
 
-func (d *MockDataSource) Query() (inertia.SystemState, error) {
+func (d *MockDataSource) Query() (inertia.Snapshot, error) {
 
     now := time.Now()
     next_result := d.lastTime.Add(d.freq)
 
     if now.Before(next_result) {
-        return uc.SystemState{}, errors.New("No new data")
+        return inertia.Snapshot {}, errors.New("No new data")
     }
 
     d.lastTime = now
 
     units := []uc.UnitState {
-        { d.units[0], randBool(), 10, 100 },
-        { d.units[1], randBool(), 5, 50 },
-        { d.units[2], randBool(), 10, 100 },
-        { d.units[3], randBool(), 1, 100 },
+        { d.units[0], randBool() },
+        { d.units[1], randBool() },
+        { d.units[2], randBool() },
+        { d.units[3], randBool() },
     }
-    
-    return uc.SystemState { now, 1500, units }, nil
+
+    state := uc.SystemState { now, 1500, units }
+
+    return state.Inertia()
 
 }
 

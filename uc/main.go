@@ -8,8 +8,6 @@ import (
 type UnitState struct {
     inertia.UnitMetadata
     Committed bool
-    H float64 // s
-    Rating float64 // MVA
 }
 
 type SystemState struct {

@@ -38,7 +38,7 @@ type DataSource interface {
     // This allows for making repeated queries until there's
     // nothing new to report, at which point the user can wait some amount of
     // time before trying again.
-    Query() (SystemState, error)
+    Query() (Snapshot, error)
 
 }
 
@@ -71,15 +71,13 @@ func Run(source DataSource, vizs []Visualizer,
 
     for {
 
-        state, err := source.Query()
+        snapshot, err := source.Query()
         if err != nil {
             // TODO: Only report non-waiting errors
             log.Print("Query error: ", err)
             time.Sleep(fail_freq)
             continue
         }
-
-        snapshot, err := state.Inertia()
 
         for _, viz := range vizs {
             viz.Update(snapshot)

@@ -15,10 +15,10 @@ func TestInertiaCalculation(t *testing.T) {
     regions := []inertia.Region { { "Region A" }, { "Region B" } }
 
     units := []UnitState {
-        { inertia.UnitMetadata {"U1", &categories[0], &regions[0] }, true, 10, 100 },
-        { inertia.UnitMetadata {"U2", &categories[0], &regions[1] }, true, 5, 50 },
-        { inertia.UnitMetadata {"U3", &categories[1], &regions[0] }, false, 10, 100 },
-        { inertia.UnitMetadata {"U4", &categories[1], &regions[1] }, true, 1, 100 },
+        { inertia.UnitMetadata {"U1", &categories[0], &regions[0], 10, 100 }, true },
+        { inertia.UnitMetadata {"U2", &categories[0], &regions[1], 5, 50 }, true },
+        { inertia.UnitMetadata {"U3", &categories[1], &regions[0], 10, 100 }, false },
+        { inertia.UnitMetadata {"U4", &categories[1], &regions[1], 1, 100 }, true },
     }
 
     state := SystemState { time.Now(), 1000, units }

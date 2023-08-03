@@ -23,18 +23,8 @@ type UnitMetadata struct {
     Name string
     Category *UnitCategory
     Region *Region
-}
-
-// The SystemState interface represents an abstract collection of power system
-// state data necessary for a particular inertia estimation method. This
-// interface only needs to be implemented when adding new estimation methods,
-// not when adding new DataSources for an existing estimation method.
-type SystemState interface {
-
-    // Types implementing SystemState should have an Inertia method that
-    // converts internal state data into inertia levels for reporting.
-    Inertia() (Snapshot, error)
-
+    Rating float64 // in MVA
+    H float64 // in s
 }
 
 // Snapshot is the common data structure used for reporting inertia
