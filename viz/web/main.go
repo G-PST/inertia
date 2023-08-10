@@ -143,20 +143,9 @@ func getNewer(states []inertia.Snapshot, latest time.Time) (inertia.Snapshot, er
 // TODO: Just define appropriate methods in inertia/internal?
 func jsonify_meta(meta inertia.SystemMetadata) ([]byte, error) {
 
-    regions := map[string]inertia.Region {}
-    categories := map[string]inertia.UnitCategory {}
-
-    for _, region := range meta.Regions {
-        regions[region.Name] = region
-    }
-
-    for _, category := range meta.Categories {
-        categories[category.Name] = category
-    }
-
     response := map[string]any {
-        "regions": regions,
-        "categories": categories,
+        "regions": meta.Regions,
+        "categories": meta.Categories,
     }
 
     return json.Marshal(response)
