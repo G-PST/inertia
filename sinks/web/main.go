@@ -156,9 +156,10 @@ func jsonify(report inertia.Snapshot) ([]byte, error) {
 
     response := map[string]any {
         "time": report.Time.UnixMilli(),
-        "total": report.Total,
         "requirement": report.Requirement,
-        "inertia": report.Categories,
+        "total": report.Total,
+        "categories": report.Categories,
+        "regions": report.Regions,
     }
 
     return json.Marshal(response)

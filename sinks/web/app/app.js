@@ -106,9 +106,9 @@ function appendInertia(data, latest) {
 
     data.periods.timestamps.push(latest.time);
     data.periods.requirement.push(latest.requirement);
-    data.periods.total.push(latest.total);
+    data.periods.total.push(latest.total.total_inertia);
     data.periods.categories.forEach(category => {
-        category_inertia = latest.inertia[category.name];
+        category_inertia = latest.categories[category.name].total_inertia;
         category.inertia.push(category_inertia);
     });
 
@@ -216,16 +216,16 @@ function updateText(currentData) {
 
     d3.select("#time #lastupdate").text(timestamp);
 
-    absolute = inertiaText(currentData.total);
+    absolute = inertiaText(currentData.total.total_inertia);
 
-    if (currentData.total > currentData.requirement) {
+    if (currentData.total.total_inertia > currentData.requirement) {
 
-        surplus = currentData.total - currentData.requirement;
+        surplus = currentData.total.total_inertia - currentData.requirement;
         relative = inertiaText(surplus) + " above threshold"
         color = "#EEEEEE";
 
     } else {
-        shortfall = currentData.requirement - currentData.total;
+        shortfall = currentData.requirement - currentData.total.total_inertia;
         relative = inertiaText(shortfall) + " below threshold"
         color = "#FF0000";
     }
@@ -297,9 +297,9 @@ function categoryRingData(latest, cx, cy, r) {
     categories = [];
     cum_angle = 0
 
-    for (const c of Object.keys(latest.inertia)) {
+    for (const c of Object.keys(latest.categories)) {
 
-        share = latest.inertia[c] / latest.total;
+        share = latest.categories[c].total_inertia / latest.total.total_inertia;
         angle = share * 2 * Math.PI;
 
         mid_x = cx + r * Math.sin(cum_angle + angle/2);
@@ -328,7 +328,7 @@ function categoryRingData(latest, cx, cy, r) {
             "path": path,
             "mid_x": mid_x,
             "mid_y": mid_y,
-            "val": latest.inertia[c],
+            "val": latest.categories[c].total_inertia,
             "share": share,
             "arclength": r*angle
         });

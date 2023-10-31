@@ -71,7 +71,7 @@ func (d *MockDataSource) Query() (inertia.Snapshot, error) {
         { d.system.Units["U4"], randBool() },
     }
 
-    state := inertia.SystemState { now, 1500, units }
+    state := inertia.SystemState { now, 1500, units, &d.system }
 
     return state.Inertia()
 

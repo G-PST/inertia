@@ -27,11 +27,11 @@ func (tv TextDataSink) Update(snapshot inertia.Snapshot) {
 
     timestamp := snapshot.Time.Format(time.RFC3339)
 
-    text := fmt.Sprintf("%v: %v MWs\n", timestamp, snapshot.Total)
+    text := fmt.Sprintf("%v: %v MWs\n", timestamp, snapshot.Total.TotalInertia)
     tv.outfile.WriteString(text)
 
     for category, inertia := range snapshot.Categories {
-        text = fmt.Sprintf("\t%v\t%v MWs\n", category, inertia)
+        text = fmt.Sprintf("\t%v\t%v MWs\n", category, inertia.TotalInertia)
         tv.outfile.WriteString(text)
     }
 
