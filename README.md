@@ -15,12 +15,12 @@ System integrators can provide deployment-specfic data ingestion code
 conforms to the stated data interfaces for the desired estimation method.
 Once these input interfaces are
 implemented, ingested data can be automatically processed and reported out
-via the package's real-time visualization framework.
+via the package's DataSink framework.
 
-This package provides two off-the-shelf visualization
-modules in `inertia/viz/text` and `inertia/viz/web`, but
+This package provides two off-the-shelf data output and visualization
+modules in `inertia/sinks/text` and `inertia/sinks/web`, but
 custom implementations of
-the Visualizer interface can also be used. Multiple Visualizers can be
+the DataSink interface can also be used. Multiple DataSinks can be
 associated with a single real-time data stream, allowing for reporting to
 multiple outputs at the same time, for example logging to a text file while
 also visualizing results in a web browser.

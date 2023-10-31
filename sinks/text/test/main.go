@@ -4,16 +4,16 @@ import (
     "time"
 
     "github.com/G-PST/inertia"
-    "github.com/G-PST/inertia/viz/text"
+    "github.com/G-PST/inertia/sinks/text"
     d "github.com/G-PST/inertia/uc/mockdata"
 )
 
 func main() {
 
     datasource := d.New(2 * time.Second)
-    vizs := []inertia.Visualizer { text.New() }
+    sinks := []inertia.DataSink{ text.New() }
 
-    inertia.Run(datasource, vizs, 500 * time.Millisecond, time.Second)
+    inertia.Run(datasource, sinks, 500 * time.Millisecond, time.Second)
 
 }
 

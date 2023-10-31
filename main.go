@@ -14,7 +14,7 @@
 // via the package's real-time visualization framework.
 // 
 // This package provides two off-the-shelf visualization
-// modules in inertia/viz/text and inertia/viz/web, but
+// modules in inertia/sink/text and inertia/sink/web, but
 // custom implementations of
 // the [Visualizer] interface can also be used. Multiple Visualizers can be
 // associated with a single real-time data stream, allowing for reporting to
@@ -42,7 +42,7 @@ type DataSource interface {
 
 }
 
-type Visualizer interface {
+type DataSink interface {
 
     // Pass in static system parameters to the visualization.
     // Should be called exactly once, before any Updates are provided.
@@ -53,7 +53,7 @@ type Visualizer interface {
 
 }
 
-func Run(source DataSource, vizs []Visualizer,
+func Run(source DataSource, sinks []DataSink,
          success_freq time.Duration, fail_freq time.Duration) {
 
     metadata := source.Metadata()
@@ -62,8 +62,8 @@ func Run(source DataSource, vizs []Visualizer,
         len(metadata.Regions), len(metadata.Categories),
     )
 
-    for _, viz := range vizs {
-        err := viz.Init(metadata)
+    for _, sink := range sinks {
+        err := sink.Init(metadata)
         if err != nil {
             log.Fatal("Visualizer initialization error: ", err)
         }
@@ -79,8 +79,8 @@ func Run(source DataSource, vizs []Visualizer,
             continue
         }
 
-        for _, viz := range vizs {
-            viz.Update(snapshot)
+        for _, sink := range sinks {
+            sink.Update(snapshot)
         }
 
         time.Sleep(success_freq)

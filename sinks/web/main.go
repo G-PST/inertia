@@ -20,7 +20,7 @@ const ServerError = 500
 //go:embed app
 var assets embed.FS
 
-type WebVisualizer struct {
+type WebDataSink struct {
 
     bind string
 
@@ -29,14 +29,14 @@ type WebVisualizer struct {
 
 }
 
-func New(bind string) *WebVisualizer {
+func New(bind string) *WebDataSink {
 
-    wv := &WebVisualizer { bind: bind }
+    wv := &WebDataSink { bind: bind }
     return wv
 
 }
 
-func (wv *WebVisualizer) Init(meta inertia.SystemMetadata) error {
+func (wv *WebDataSink) Init(meta inertia.SystemMetadata) error {
 
     appdir, err := fs.Sub(assets, "app")
     if err != nil { return err }
@@ -52,11 +52,11 @@ func (wv *WebVisualizer) Init(meta inertia.SystemMetadata) error {
 
 }
 
-func (wv *WebVisualizer) Update(state inertia.Snapshot) {
+func (wv *WebDataSink) Update(state inertia.Snapshot) {
     wv.States = append(wv.States, state) 
 }
 
-func serveMetadata(wv *WebVisualizer) http.HandlerFunc {
+func serveMetadata(wv *WebDataSink) http.HandlerFunc {
 
     return func(w http.ResponseWriter, r *http.Request) {
 
@@ -73,7 +73,7 @@ func serveMetadata(wv *WebVisualizer) http.HandlerFunc {
 
 }
 
-func serveInertiaData(wv *WebVisualizer) http.HandlerFunc {
+func serveInertiaData(wv *WebDataSink) http.HandlerFunc {
 
     // TODO: Return ALL states newer than latest, not just one
     return func(w http.ResponseWriter, r *http.Request) {

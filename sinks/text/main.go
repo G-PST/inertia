@@ -9,21 +9,21 @@ import (
     "github.com/G-PST/inertia"
 )
 
-// Visualizer outputting inertia data in text format
-type TextVisualizer struct {
+// DataSink outputting inertia data in text format
+type TextDataSink struct {
     outfile io.StringWriter
 }
 
-// Creates a new TextVisualizer that reports results via standard output
-func New() TextVisualizer {
-    return TextVisualizer { os.Stdout }
+// Creates a new TextDataSink that reports results via standard output
+func New() TextDataSink {
+    return TextDataSink { os.Stdout }
 }
 
-func (tv TextVisualizer) Init(state inertia.SystemMetadata) error {
+func (tv TextDataSink) Init(state inertia.SystemMetadata) error {
     return nil
 }
 
-func (tv TextVisualizer) Update(snapshot inertia.Snapshot) {
+func (tv TextDataSink) Update(snapshot inertia.Snapshot) {
 
     timestamp := snapshot.Time.Format(time.RFC3339)
 
