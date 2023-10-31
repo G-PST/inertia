@@ -5,7 +5,7 @@ import (
 
     "github.com/G-PST/inertia"
     "github.com/G-PST/inertia/sinks/web"
-    d "github.com/G-PST/inertia/uc/mockdata"
+    d "github.com/G-PST/inertia/sources/mock"
 )
 
 func main() {
