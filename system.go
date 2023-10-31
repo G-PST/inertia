@@ -34,6 +34,17 @@ type SystemMetadata struct {
     Units map[string]UnitMetadata
 }
 
+type UnitState struct {
+    UnitMetadata
+    Committed bool
+}
+
+type SystemState struct {
+    Time time.Time
+    Requirement float64
+    Units []UnitState
+}
+
 // Snapshot is the common data structure used for reporting inertia
 // levels at a point in time.
 type Snapshot struct {
@@ -41,4 +52,32 @@ type Snapshot struct {
     Total float64
     Requirement float64
     Categories map[string]float64
+}
+
+// TODO: Always report all categories, even when SystemState doesn't have
+// any for that category (committed or otherwise)
+func (st SystemState) Inertia() (Snapshot, error) {
+
+    total_inertia := 0.0
+    category_inertia := make(map[string]float64)
+
+    for _, unit := range st.Units {
+
+        var unit_inertia float64
+
+        if unit.Committed {
+            unit_inertia = unit.H * unit.Rating
+        }
+
+        total_inertia += unit_inertia
+        category_inertia[unit.Category.Name] += unit_inertia
+
+    }
+
+    return Snapshot{
+        st.Time,
+        total_inertia, st.Requirement,
+        category_inertia,
+    }, nil
+
 }

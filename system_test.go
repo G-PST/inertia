@@ -1,24 +1,23 @@
-package uc
+package inertia
 
 import (
     "testing"
     "time"
-    "github.com/G-PST/inertia"
 )
 
 func TestInertiaCalculation(t *testing.T) {
 
-    categories := []inertia.UnitCategory {
+    categories := []UnitCategory {
         { "C1", "#00FF00", 1 }, { "C2", "#0000FF", 2 },
     }
 
-    regions := []inertia.Region { { "Region A" }, { "Region B" } }
+    regions := []Region { { "Region A" }, { "Region B" } }
 
     units := []UnitState {
-        { inertia.UnitMetadata {"U1", &categories[0], &regions[0], 10, 100 }, true },
-        { inertia.UnitMetadata {"U2", &categories[0], &regions[1], 5, 50 }, true },
-        { inertia.UnitMetadata {"U3", &categories[1], &regions[0], 10, 100 }, false },
-        { inertia.UnitMetadata {"U4", &categories[1], &regions[1], 1, 100 }, true },
+        { UnitMetadata {"U1", &categories[0], &regions[0], 10, 100 }, true },
+        { UnitMetadata {"U2", &categories[0], &regions[1], 5, 50 }, true },
+        { UnitMetadata {"U3", &categories[1], &regions[0], 10, 100 }, false },
+        { UnitMetadata {"U4", &categories[1], &regions[1], 1, 100 }, true },
     }
 
     state := SystemState { time.Now(), 1000, units }

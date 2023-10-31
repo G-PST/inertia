@@ -6,7 +6,6 @@ import (
     "time"
 
     "github.com/G-PST/inertia"
-    "github.com/G-PST/inertia/uc"
 )
 
 type MockDataSource struct {
@@ -65,14 +64,14 @@ func (d *MockDataSource) Query() (inertia.Snapshot, error) {
 
     d.lastTime = now
 
-    units := []uc.UnitState {
+    units := []inertia.UnitState {
         { d.system.Units["U1"], randBool() },
         { d.system.Units["U2"], randBool() },
         { d.system.Units["U3"], randBool() },
         { d.system.Units["U4"], randBool() },
     }
 
-    state := uc.SystemState { now, 1500, units }
+    state := inertia.SystemState { now, 1500, units }
 
     return state.Inertia()
 
