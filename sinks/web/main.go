@@ -3,7 +3,6 @@ package web
 import (
     "encoding/json"
     "embed"
-    "errors"
     "fmt"
     "io/fs"
     "net/http"
@@ -25,13 +24,15 @@ type WebDataSink struct {
     bind string
 
     Metadata inertia.SystemMetadata
-    States []inertia.Snapshot
+    States SnapshotRing
 
 }
 
-func New(bind string) *WebDataSink {
+func New(bind string, bufferlength int) *WebDataSink {
 
-    wv := &WebDataSink { bind: bind }
+    buffer := NewSnapshotRing(bufferlength)
+
+    wv := &WebDataSink { bind: bind, States: buffer }
     return wv
 
 }
@@ -53,7 +54,7 @@ func (wv *WebDataSink) Init(meta inertia.SystemMetadata) error {
 }
 
 func (wv *WebDataSink) Update(state inertia.Snapshot) {
-    wv.States = append(wv.States, state) 
+    wv.States.Push(state)
 }
 
 func serveMetadata(wv *WebDataSink) http.HandlerFunc {
@@ -91,7 +92,7 @@ func serveInertiaData(wv *WebDataSink) http.HandlerFunc {
             return
         }
 
-        state, err := getNewer(wv.States, latest)
+        state, err := wv.States.FirstAfter(latest)
         if err != nil {
             w.WriteHeader(NoNewData)
             fmt.Fprintln(w, "No new data")
@@ -123,20 +124,6 @@ func parseTime(timestamp string) (time.Time, error) {
     }
 
     return time.UnixMilli(int64(t) + 1), nil
-
-}
-
-func getNewer(states []inertia.Snapshot, latest time.Time) (inertia.Snapshot, error) {
-
-    for _, state := range states {
-
-        if state.Time.After(latest) {
-            return state, nil
-        }
-
-    }
-
-    return inertia.Snapshot {}, errors.New("No newer states avaialable")
 
 }
 

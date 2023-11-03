@@ -11,7 +11,7 @@ import (
 func main() {
 
     datasource := d.New(10 * time.Second)
-    sinks := []inertia.DataSink { web.New(":8181") }
+    sinks := []inertia.DataSink { web.New(":8080", 4) }
 
     inertia.Run(datasource, sinks, 500 * time.Millisecond, time.Second)
 
